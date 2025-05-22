@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recipe Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <style>
+        /* Additional styles for accordion behavior */
+        .logo {
+            background-color: #59F1C7;
+        }
+
+        .logo img {
+            width: 200px;
+        }
+
+        .errors {
+            background-color: crimson
+        }
+
+        .button.tag {
+            background-color: #eee;
+        }
+
+        .button.tag.selected {
+            background-color: #007BFF;
+            /* Bootstrap blue */
+            color: white;
+        }
+    </style>
+</head>
+
+<body id="app">
+    <div class="section">
+        <strong>Welcome [[=user['first_name']]]</strong>
+        <form action="[[=URL('auth/logout')]]" method="post" style="display:inline;">
+            <button type="submit" class="button is-light">Logout</button>
+        </form>
+    </div>
+    <div class="columns">
+        <div class="column">
+            <div>
+                <strong>Ingredients</strong>
+                [[=ingredients_form]]
+            </div>
+            <div>-------------------------bad divider-----------------------------------</div>
+            <div>
+                <strong>Recipes</strong>
+                [[=recipes_form]]
+            </div>
+            <!-- Posts
+            <div class="control">
+                <textarea class="post-content" id="postContent" placeholder="Post Content"></textarea>
+                <button class="button submit-content" v-on:click="add_post()">Submit Post</button>
+            </div> -->
+        </div>
+        <div class="column">
+
+            <div>
+                <strong>Search bar/ recipe cards here?</strong>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+    <script src="[[=URL('static', 'js/index.js')]]"></script>
+</body>
+
+</html>
