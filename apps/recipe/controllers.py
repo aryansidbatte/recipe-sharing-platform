@@ -21,18 +21,6 @@ import re
 
 from py4web import action, request, abort, redirect
 from .common import auth
-# import os
-# from py4web import action, request, response
-# import mimetypes
-
-# UPLOAD_PATH = os.path.join(os.path.dirname(__file__), 'uploads')
-
-# @action('uploads/<filename>')
-# def serve_upload(filename):
-#     file_path = os.path.join(UPLOAD_PATH, filename)
-#     content_type, _ = mimetypes.guess_type(file_path)
-#     response.headers['Content-Type'] = content_type or 'application/octet-stream'
-#     return open(file_path, 'rb').read()
 
 @action("index")
 @action.uses("index.html", auth.user, T)
