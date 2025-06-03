@@ -34,28 +34,32 @@
             </div>
         </div>
         <div class="column">
-
-            <div>
-                <strong>Search bar/ recipe cards here?</strong>
-            </div>
-            <div>
-                <article v-for="recipe in filtered_recipes">
-                    <!-- display all recipe cards that match the search query, which is currently nothing. -->
-                    <div class="card">
-                        <div class="card-header-title">
-                            <div class="card-header-title">{{recipe.name}}</div>
-                            <div class="card-content">Type: {{recipe.type}}</div>
+            <div class="field">
+                <p><strong>Recipes</strong></p>
+                <label class="label">Search Recipes</label>
+                <div class="control">
+                    <input class="input" type="text" placeholder="Search by name or type..."
+                        @keyup="search_recipes($event.target.value)" />
+                    <article v-for="recipe in filtered_recipes">
+                        <!-- display all recipe cards that match the search query -->
+                        <div class="card">
+                            <div class="card-header-title">
+                                <div class="card-header-title">{{recipe.name}}</div>
+                                <div class="card-content">Type: {{recipe.type}}</div>
+                            </div>
+                            <div class="card-content">
+                                <img v-if="recipe.image" :src="`/recipe/download/${recipe.image}`" alt="Recipe Image" />
+                                <div><strong>Description: </strong> </div>
+                                <div>{{recipe.description}}</div>
+                                <div><strong>Instructions: </strong> </div>
+                                <div>{{recipe.instruction_steps}}</div>
+                                <div><strong>Servings: </strong> {{recipe.servings}}</div>
+                            </div>
                         </div>
-                        <div class="card-content">
-                            <img v-if="recipe.image" :src="`/recipe/download/${recipe.image}`" alt="Recipe Image" />
-                            <div><strong>Description: </strong> </div>
-                            <div>{{recipe.description}}</div>
-                            <div><strong>Instructions: </strong> </div>
-                            <div>{{recipe.instruction_steps}}</div>
-                            <div><strong>Servings: </strong> {{recipe.servings}}</div>
-                        </div>
-                    </div>
-                </article>
+                    </article>
+                </div>
+                <div>
+                </div>
             </div>
         </div>
     </div>
