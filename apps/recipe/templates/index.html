@@ -13,9 +13,12 @@
 <script src="[[=URL('static', 'js/index.js')]]"></script>
 [[end]]
 -->
+<head>
+    <link rel="stylesheet" href="/recipe/static/css/home.css">
+</head>
 
 <div id="app">
-    <div class="section">
+    <div class="welcome">
         <strong>Welcome [[=user['first_name']]]</strong>
         <form action="[[=URL('auth/logout')]]" method="post" style="display:inline;">
             <button type="submit" class="button is-light">Logout</button>
@@ -27,7 +30,7 @@
                 <strong>Ingredients</strong>
                 [[=ingredients_form]]
             </div>
-            <div>-------------------------bad divider-----------------------------------</div>
+            <hr>
             <div>
                 <strong>Recipes</strong>
                 [[=recipes_form]]
@@ -46,7 +49,7 @@
                             <div class="card-header-title">{{recipe.name}}</div>
                             <div class="card-content">Type: {{recipe.type}}</div>
                         </div>
-                        <div>-------------bad divider----------</div>
+                        <hr>
                         <div class="card-content">
                             <div v-if="recipe.image">
                                 <div>supposed to be an image but it doesn't work idk why</div>
