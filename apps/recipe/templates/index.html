@@ -1,15 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
+[[extend 'layout.html']]
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Recipe Manager</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
-</head>
+<!-- [[block page_head]]
+<title>Recipe Manager</title>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+[[end]]
+-->
 
-<body id="app">
+<!--
+[[block page_scripts]]
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+<script src="[[=URL('static', 'js/index.js')]]"></script>
+[[end]]
+-->
+
+<div id="app">
     <div class="section">
         <strong>Welcome [[=user['first_name']]]</strong>
         <form action="[[=URL('auth/logout')]]" method="post" style="display:inline;">
@@ -58,8 +63,4 @@
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
-    <script src="[[=URL('static', 'js/index.js')]]"></script>
-</body>
-
-</html>
+</div>
