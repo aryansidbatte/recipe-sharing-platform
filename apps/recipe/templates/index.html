@@ -20,9 +20,6 @@
 <div id="app">
     <div class="welcome">
         <strong>Welcome [[=user['first_name']]]</strong>
-        <!-- <form action="[[=URL('auth/logout')]]" method="post" style="display:inline;">
-            <button type="submit" class="button is-light">Logout</button>
-        </form> -->
     </div>
     <div class="columns">
         <div class="column">
@@ -40,10 +37,11 @@
         <div id="recipeModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <h2>New Recipe</h2>
+                <h2><strong>New Recipe</strong></h2>
                 [[=recipes_form]]
             </div>
         </div>
+
 
         <div class="column">
             <div class="field">
@@ -55,11 +53,12 @@
                     <article v-for="recipe in filtered_recipes">
                         <!-- display all recipe cards that match the search query -->
                         <div class="card">
-                            <div class="card-header-title">
-                                <div class="card-header-title">{{recipe.name}}</div>
-                                <div class="card-content">Type: {{recipe.type}}</div>
-                            </div>
-                                                    <hr>
+                            <header class="card-header">
+                                <div class="card-header-title">
+                                    <div class="card-header-title">{{recipe.name}}</div>
+                                    <div class="card-content">Type: {{recipe.type}}</div>
+                                </div>
+                            </header>
                             <div class="card-content">
                                 <img v-if="recipe.image" :src="`/recipe/download/${recipe.image}`" alt="Recipe Image" />
                                 <div><strong>Description: </strong> </div>
@@ -72,6 +71,7 @@
                     </article>
                 </div>
                 <div>
+
                 </div>
             </div>
         </div>
