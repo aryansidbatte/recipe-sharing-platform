@@ -1,6 +1,6 @@
 "use strict";
 
-let app = {}
+var app = {}
 app.config = {
     data: function () {
         console.log("Mounting")
