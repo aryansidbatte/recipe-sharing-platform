@@ -17,7 +17,7 @@ db.define_table(
     Field("image", type="upload"),
     Field("instruction_steps",type="string", requires=IS_NOT_EMPTY()),
     Field("servings", type="integer", requires=IS_INT_IN_RANGE(0,1000)),
-    Field("author", "reference auth_user", requires=IS_NOT_EMPTY(), readable=False, writable=False),
+    Field("author", "reference auth_user", readable=False, writable=False),
 )
 
 db.define_table(
