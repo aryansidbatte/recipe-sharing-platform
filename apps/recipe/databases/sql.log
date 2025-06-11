@@ -110,3 +110,4 @@ CREATE TABLE "auth_user"(
     "past_passwords_hash" TEXT
 );
 success!
+success!

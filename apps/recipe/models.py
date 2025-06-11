@@ -31,21 +31,23 @@ db.define_table(
 
 # Connects to TheMealDB API and fills the database with recipes
 def populate_db():
-    base_api_url = "www.themealdb.com/api/json/v1/1/search.php?f="
+    base_api_url = "https://www.themealdb.com/api/json/v1/1/search.php?f="
     all_meals = []
 
     print("Accessing TheMealDB API")
     for letter in "abcdefghijklmnopqrstuvwxyz":
+        print("Requesting Letter: " + base_api_url+letter)
         try:
             response = requests.get(base_api_url + letter)
             response.raise_for_status()
             data = response.json()
-            if (data.get(meals)):
+            print(data)
+            if (data["meals"]):
                 all_meals.extend(data["meals"])
         except requests.exceptions.RequestException as e:
             print(f"Could not fetch recipes for letter '{letter}': {e}")
 
-    for meal in meals:
+    for meal in all_meals:
         recipe_id = db.recipes.insert(
             name=meal.get("strMeal"),
             type=meal.get("strCategory"),
@@ -61,11 +63,11 @@ def populate_db():
         measure = meal.get(f"strMeasure{i}")
 
         if ingredient_name and ingredient_name.strip():
-                ingredient = db.ingredients.get_or_insert(
+                ingredient = db.ingredients.update_or_insert(
                     name=ingredient_name,
-                    defaults={
-                        "unit": 0, "calories_per_unit": 0, "description": "Imported"
-                    }
+                    unit="g",
+                    calories_per_unit=1,
+                    description="imported",
                 )
                 
                 quantity = 0
@@ -89,5 +91,6 @@ def populate_db():
                     quantity_per_serving=quantity,
                 )
 
+populate_db()
 
 db.commit()
