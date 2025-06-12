@@ -1,87 +1,155 @@
 "use strict";
 
-let app = {}
+// small helper
+function ajax(url, method, data, cb) {
+  const opt = {
+    method,
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+  };
+  if (data) opt.body = JSON.stringify(data);
 
-function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+  return fetch(url, opt)
+    .then((r) => r.json())
+    .then((j) => {
+      if (j.errors?.length) {
+        alert("Validation error:\n" + JSON.stringify(j.errors));
+      } else if (cb) cb(j);
+    })
+    .catch(() => alert("Network error"));
+}
 
-function ajax(url, method, data, callback) {
-    let options = {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin'
+// vue config
+const app = {
+  data() {
+    return {
+      // db tables
+      recipes: [],
+      filtered_recipes: [],
+      ingredients: [],
+      selected_ingredients: [],
+
+      // search boxes
+      ingredient_search: "",
+
+      // modal & form 
+      showModal: false,
+      newRecipe: {
+        name: "",
+        type: "",
+        description: "",
+        instruction_steps: "",
+        servings: 1,
+        selected: [],        // [ingredient id, …]
+        qty: {},             // {id: quantity_per_serving}
+      },
     };
-    if (data) {
-        options.body = JSON.stringify(data);
-    }
-    return fetch(url, options).then(response => { return response.json(); }).then(function(res){
-        if(res.errors && res.errors.length) {
-            console.log(res);
-            alert("validation error " + JSON.stringify(res.errors));
-        } else if (callback) {
-            callback(res);
+  },
+
+  computed: {
+    /* live calorie preview inside the modal */
+    calculatedCalories() {
+      if (this.newRecipe.selected.length === 0) return null;
+      let perServing = 0;
+      this.newRecipe.selected.forEach((id) => {
+        const ing = this.ingredients.find((x) => x.id === id);
+        if (ing) {
+          const q = this.newRecipe.qty[id] || 1;
+          perServing += q * ing.calories_per_unit;
         }
-    }, function(){ alert("network error"); });
-}
-
-app.empty_ingredient = { id: 0, name: "", unit: "", calories_per_unit: 0, description: "" };
-
-
-app.config = {
-    data: function () {
-        console.log("Mounting")
-        return {
-            recipes: [],
-            filtered_recipes: [],
-            ingredients: [],
-            selected_ingredients: [],
-            new_ingredient: clone(app.empty_ingredient),
-            ingredient_search: "",
-            editing: { current: null },
-        };
+      });
+      return perServing * (this.newRecipe.servings || 1);
     },
-    methods: {
-        search: function() {
-            const term = this.new_ingredient.name.toLowerCase();
-            this.selected_ingredients = this.ingredients.filter(ing => ing.name.toLowerCase().includes(term));
-        },
-        search_recipes: function (input_text) {
-            // console.log(input_text)
-            const text = input_text.toLowerCase();
-            this.filtered_recipes = this.recipes.filter(recipe => (recipe.name.toLowerCase().includes(text) | recipe.type.toLowerCase().includes(text)));
-        },
-    }
-}
+  },
 
-app.load_recipe_data = function () {
-    const options = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    };
-    fetch('/recipe/api/recipes', options)
-        .then(response => response.json())
-        .then(jsonResponse => {
-            app.vue.recipes = jsonResponse.recipes;
-            app.vue.filtered_recipes = jsonResponse.recipes;
-        });
-}
+  methods: {
+    // search boxes
+    search() {
+      const t = this.ingredient_search.toLowerCase().trim();
+      this.selected_ingredients = this.ingredients.filter((i) =>
+        i.name.toLowerCase().includes(t)
+      );
+    },
+    search_recipes(txt) {
+      const t = (txt || "").toLowerCase();
+      this.filtered_recipes = this.recipes.filter(
+        (r) => r.name.toLowerCase().includes(t) || r.type.toLowerCase().includes(t)
+      );
+    },
 
-app.load_ingredient_data = function () {
-    const options = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    };
-    fetch('/recipe/api/ingredients', options)
-        .then(response => response.json())
-        .then(jsonResponse => {
-            app.vue.ingredients = jsonResponse.ingredients;
-            app.vue.selected_ingredients = jsonResponse.ingredients;
-        });
-}
+    // modal controls
+    openModal() {
+      this.resetForm();
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+    },
+    resetForm() {
+      this.newRecipe = {
+        name: "",
+        type: "",
+        description: "",
+        instruction_steps: "",
+        servings: 1,
+        selected: [],
+        qty: {},
+      };
+    },
 
-app.vue = Vue.createApp(app.config).mount("#app");
-app.load_recipe_data();
-app.load_ingredient_data();
+    // CRUD calls
+    saveRecipe() {
+      if (
+        !this.newRecipe.name ||
+        !this.newRecipe.type ||
+        this.newRecipe.selected.length === 0
+      ) {
+        alert("Fill all required fields and pick at least one ingredient.");
+        return;
+      }
+
+      const payload = {
+        name: this.newRecipe.name,
+        type: this.newRecipe.type,
+        description: this.newRecipe.description,
+        instruction_steps: this.newRecipe.instruction_steps,
+        servings: this.newRecipe.servings,
+        ingredients: this.newRecipe.selected.map((id) => ({
+          id,
+          qty: this.newRecipe.qty[id] || 1,
+        })),
+      };
+
+      ajax("/recipe/api/recipe", "POST", payload, (res) => {
+        alert("Recipe saved! Total calories = " + res.total_calories);
+        this.closeModal();
+        this.loadRecipes();     // refresh list
+      });
+    },
+
+    // load dataZZ
+    loadRecipes() {
+      ajax("/recipe/api/recipes", "GET", null, (res) => {
+        this.recipes = res.recipes;
+        this.filtered_recipes = res.recipes;
+      });
+    },
+    loadIngredients() {
+      ajax("/recipe/api/ingredients", "GET", null, (res) => {
+        this.ingredients = res.ingredients;
+        this.selected_ingredients = res.ingredients;
+      });
+    },
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* life-cycle                                                       */
+  /* ---------------------------------------------------------------- */
+  mounted() {
+    this.loadRecipes();
+    this.loadIngredients();
+  },
+};
+
+/* mount */
+Vue.createApp(app).mount("#app");

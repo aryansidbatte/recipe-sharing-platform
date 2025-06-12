@@ -1,115 +1,180 @@
 [[extend 'layout.html']]
 
-<!-- [[block page_head]]
-<title>Recipe Manager</title>
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+<!-- ─────────────────────────  HEAD  ──────────────────────────── -->
+[[block page_head]]
+  <title>Recipe Manager</title>
+
+  <!-- Bulma + local CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="stylesheet" href="/recipe/static/css/home.css">
+
+  <!-- Vue (prod build) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
 [[end]]
--->
 
-<!--
-[[block page_scripts]]
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
-<script src="[[=URL('static', 'js/index.js')]]"></script>
-[[end]]
--->
-<head>
-    <link rel="stylesheet" href="/recipe/static/css/home.css">
-</head>
+<!-- ─────────────────────────  BODY  ──────────────────────────── -->
+<div id="app" class="p-4">
 
-<div id="app">
-    <div class="welcome">
-        <strong>Welcome [[=user['first_name']]]</strong>
+  <div class="mb-4">
+    <strong>Welcome [[=user['first_name']]]</strong>
+  </div>
+
+  <div class="columns">
+
+    <!-- ───── LEFT COLUMN  –  forms ─────────────────────────── -->
+    <div class="column is-one-quarter">
+      <h3 class="title is-5">Add Ingredient</h3>
+      [[=ingredients_form]]
+      <hr>
+      <button class="button is-primary" @click="openModal">Add New Recipe</button>
     </div>
-    <div class="columns">
-        <div class="column">
-            <div>
-                <strong>Ingredients</strong>
-                [[=ingredients_form]]
-            </div>
-            <hr>
-            <div>
-                <strong>Recipes</strong>
-                <button id="openRecipeForm">Add New Recipe</button>
-            </div>
-        </div>
-        <!-- Modal -->
-        <div id="recipeModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2><strong>New Recipe</strong></h2>
-                [[=recipes_form]]
-            </div>
-        </div>
 
-        <div class="column">
-            <div class="field">
-                <p><strong>Recipes</strong></p>
-                <label class="label">Search Recipes</label>
-                <div class="control">
-                    <input class="input" type="text" placeholder="Search by name or type..."
-                        @keyup="search_recipes($event.target.value)" />
-                    <article v-for="recipe in filtered_recipes">
-                        <!-- display all recipe cards that match the search query -->
-                        <div class="card mb-3">
-                            <header class="card-header">
-                                <div class="card-header-title">
-                                    <div class="card-header-title">{{recipe.name}}</div>
-                                    <div class="card-content">Type: {{recipe.type}}</div>
-                                </div>
-                            </header>
-                            <div class="card-content">
-                                <img v-if="recipe.image" :src="`/recipe/download/${recipe.image}`" alt="Recipe Image" />
-                                <div><strong>Description: </strong> </div>
-                                <div>{{recipe.description}}</div>
-                                <div><strong>Instructions: </strong> </div>
-                                <div>{{recipe.instruction_steps}}</div>
-                                <div><strong>Servings: </strong> {{recipe.servings}}</div>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
+    <!-- ───── MIDDLE COLUMN  –  recipe search / list ─────────── -->
+    <div class="column">
+      <h3 class="title is-5">Recipes</h3>
+
+      <div class="field">
+        <input  class="input"
+                type="text"
+                placeholder="Search by name or type…"
+                @keyup="search_recipes($event.target.value)">
+      </div>
+
+      <!-- recipe cards -->
+      <article v-for="recipe in filtered_recipes" :key="recipe.id" class="card mb-3">
+        <header class="card-header">
+          <p class="card-header-title">{{ recipe.name }}</p>
+          <span class="mr-3">Type: {{ recipe.type }}</span>
+          <span>Total Cal: {{ recipe.total_calories }}</span>
+        </header>
+
+        <div class="card-content">
+          <img v-if="recipe.image"
+               :src="`/recipe/download/${recipe.image}`"
+               class="mb-3">
+
+          <p><strong>Description:</strong> {{ recipe.description }}</p>
+          <p><strong>Instructions:</strong> {{ recipe.instruction_steps }}</p>
+          <p><strong>Servings:</strong> {{ recipe.servings }}</p>
         </div>
-        <div class="column">
-            <div class = "field">
-                <label class="label">Search Ingredients</label>
-                <div class="control">
-                    <input
-                        class="input"
-                        type="text"
-                        placeholder="Search by name..."
-                        v-model="new_ingredient.name"
-                        v-on:keyup="search()"   
-                    />
-                    <p><strong>Ingredients</strong></p>
-                    <li v-for="ingredient in selected_ingredients">
-                        <p><strong>Name:</strong>{{ ingredient.name }}</p>
-                        <p><strong>Unit:</strong>{{ ingredient.unit }}</p>
-                        <p><strong>Description:</strong> 
-                            {{ ingredient.description }}</p>
-                        <p><strong>Calories Per Unit: </strong>
-                        {{ingredient.calories_per_unit}}</p>
-                        <hr>
-                    </li>
-                </div>
-            </div>
-        </div>
+      </article>
     </div>
+
+    <!-- ───── RIGHT COLUMN – ingredient search / list ────────── -->
+    <div class="column is-one-quarter">
+      <h3 class="title is-5">Ingredients</h3>
+
+      <div class="field">
+        <input class="input"
+               type="text"
+               placeholder="Search by name…"
+               v-model="ingredient_search"
+               @keyup="search">
+      </div>
+
+      <ul>
+        <li v-for="ing in selected_ingredients" :key="ing.id" class="mb-2">
+          <p><strong>Name:</strong> {{ ing.name }}</p>
+          <p><strong>Unit:</strong> {{ ing.unit }}</p>
+          <p><strong>Calories:</strong> {{ ing.calories_per_unit }}</p>
+          <p><strong>Description:</strong> {{ ing.description }}</p>
+          <hr>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────  MODAL  ─────────────────────────── -->
+  <div class="modal" :class="{ 'is-active': showModal }">
+    <div class="modal-background" @click="closeModal"></div>
+
+    <div class="modal-card" style="width: 640px;">
+      <header class="modal-card-head">
+        <p class="modal-card-title">New Recipe</p>
+        <button class="delete" aria-label="close" @click="closeModal"></button>
+      </header>
+
+      <section class="modal-card-body">
+        <!-- hand-built form -->
+        <form @submit.prevent="saveRecipe">
+
+          <!-- name / type -->
+          <div class="field">
+            <label class="label">Name</label>
+            <div class="control">
+              <input class="input" v-model="newRecipe.name" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Type</label>
+            <div class="control">
+              <input class="input" v-model="newRecipe.type" required>
+            </div>
+          </div>
+
+          <!-- description -->
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea class="textarea" v-model="newRecipe.description"></textarea>
+            </div>
+          </div>
+
+          <!-- steps -->
+          <div class="field">
+            <label class="label">Instruction Steps</label>
+            <div class="control">
+              <textarea class="textarea" v-model="newRecipe.instruction_steps"></textarea>
+            </div>
+          </div>
+
+          <!-- servings -->
+          <div class="field">
+            <label class="label">Servings</label>
+            <div class="control">
+              <input class="input" type="number" min="1"
+                     v-model.number="newRecipe.servings" required>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- ingredient checklist -->
+          <h4 class="title is-6">Ingredients (per serving)</h4>
+          <div v-for="ing in ingredients" :key="ing.id" class="field is-grouped is-align-items-center mb-2">
+            <label class="checkbox mr-2">
+              <input type="checkbox"
+                     :value="ing.id"
+                     v-model="newRecipe.selected">
+              {{ ing.name }} ({{ ing.unit }})
+            </label>
+
+            <input v-if="newRecipe.selected.includes(ing.id)"
+                   class="input is-small"
+                   style="max-width: 80px;"
+                   type="number" min="1"
+                   v-model.number="newRecipe.qty[ing.id]">
+          </div>
+
+          <!-- live calories -->
+          <p v-if="calculatedCalories !== null" class="has-text-weight-semibold mt-3">
+            Total Calories: {{ calculatedCalories }}
+          </p>
+
+        </form>
+      </section>
+
+      <footer class="modal-card-foot">
+        <button class="button is-success" @click="saveRecipe">Save</button>
+        <button class="button" @click="closeModal">Cancel</button>
+      </footer>
+    </div>
+  </div>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const modal = document.getElementById("recipeModal");
-    const openBtn = document.getElementById("openRecipeForm");
-    const closeBtn = modal.querySelector(".close");
 
-    openBtn.onclick = () => modal.style.display = "block";
-    closeBtn.onclick = () => modal.style.display = "none";
-
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    };
-});
-</script>
+<!-- ─────────────────────────  SCRIPTS  ────────────────────────── -->
+[[block page_scripts]]
+  <!-- Vue app script (index.js already fetches data & defines methods) -->
+  <script src="[[=URL('static','js/index.js')]]"></script>
+[[end]]

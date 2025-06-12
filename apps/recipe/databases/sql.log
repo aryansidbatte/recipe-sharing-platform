@@ -1,4 +1,4 @@
-timestamp: 2025-06-12T00:21:26.795796
+timestamp: 2025-06-12T12:37:36.401105
 CREATE TABLE "auth_user"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "username" CHAR(512) UNIQUE,
@@ -12,14 +12,14 @@ CREATE TABLE "auth_user"(
     "past_passwords_hash" TEXT
 );
 success!
-timestamp: 2025-06-12T00:21:26.797437
+timestamp: 2025-06-12T12:37:36.415707
 CREATE TABLE "auth_user_tag_groups"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "tagpath" CHAR(512),
     "record_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  
 );
 success!
-timestamp: 2025-06-12T00:21:26.798967
+timestamp: 2025-06-12T12:37:36.423684
 CREATE TABLE "ingredients"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "name" CHAR(512),
@@ -28,19 +28,20 @@ CREATE TABLE "ingredients"(
     "description" TEXT
 );
 success!
-timestamp: 2025-06-12T00:21:26.799607
+timestamp: 2025-06-12T12:37:36.429544
 CREATE TABLE "recipes"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "name" CHAR(512),
     "type" CHAR(512),
-    "description" CHAR(512),
+    "description" TEXT,
     "image" CHAR(512),
-    "instruction_steps" CHAR(512),
+    "instruction_steps" TEXT,
     "servings" INTEGER,
+    "total_calories" INTEGER,
     "author" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  
 );
 success!
-timestamp: 2025-06-12T00:21:26.800341
+timestamp: 2025-06-12T12:37:36.438840
 CREATE TABLE "link"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "recipe_id" INTEGER REFERENCES "recipes" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
