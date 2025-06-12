@@ -42,9 +42,14 @@ app.config = {
     methods: {
         search: function() {
             const term = this.new_ingredient.name.toLowerCase();
-            this.selected_ingredients = this.ingredients.filter(ing => ing.name.toLowerCase().includes(term))
-        ;},
-    },
+            this.selected_ingredients = this.ingredients.filter(ing => ing.name.toLowerCase().includes(term));
+        },
+        search_recipes: function (input_text) {
+            // console.log(input_text)
+            const text = input_text.toLowerCase();
+            this.filtered_recipes = this.recipes.filter(recipe => (recipe.name.toLowerCase().includes(text) | recipe.type.toLowerCase().includes(text)));
+        },
+    }
 }
 
 app.load_recipe_data = function () {
