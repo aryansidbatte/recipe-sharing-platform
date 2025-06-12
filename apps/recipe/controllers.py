@@ -1,8 +1,6 @@
+import json
 
-from yatl.helpers import A
-
-from py4web import URL, abort, action, redirect, request, Field
-from py4web.core import Template
+from py4web import action, URL, abort, redirect, request
 from py4web.utils.form import Form
 
 from .common import (
@@ -19,62 +17,104 @@ from .common import (
 
 import re
 
-from py4web import action, request, abort, redirect
-from .common import auth
-
+# Home page – shows ingredient form + lists (Vue handles recipe form)
 @action("index")
 @action("/")
 @action.uses("index.html", auth.user, T)
 def index():
     user = auth.get_user()
-    ingredients_form = Form(
+
+    # form to add ingredients
+    ing_form = Form(
         db.ingredients,
         fields=["name", "unit", "calories_per_unit", "description"],
-        dbio=False
+        dbio=False,
     )
-    # Recipe form without allowing author field to be editable
-    recipes_form = Form(
-        db.recipes,
-        fields=["name", "type", "description", "image", "instruction_steps", "servings"],
-        dbio=False #disables automatic inserts
-    )
-    
-    if ingredients_form.accepted:
-        print("Inserting ingredients:", ingredients_form.vars["name"])
+
+    if ing_form.accepted:
         db.ingredients.insert(
-            name=ingredients_form.vars["name"],
-            unit=ingredients_form.vars["unit"],
-            calories_per_unit=ingredients_form.vars["calories_per_unit"],
-            description=ingredients_form.vars["description"],
+            name=ing_form.vars["name"],
+            unit=ing_form.vars["unit"],
+            calories_per_unit=ing_form.vars["calories_per_unit"],
+            description=ing_form.vars["description"],
         )
+        flash.set("Ingredient added")
         redirect(URL("index"))
-    
-    if recipes_form.accepted:
-        print("Inserting recipe:", recipes_form.vars["name"])
-        db.recipes.insert(
-            name=recipes_form.vars["name"],
-            type=recipes_form.vars["type"],
-            description=recipes_form.vars["description"],
-            image=recipes_form.vars["image"],
-            instruction_steps=recipes_form.vars["instruction_steps"],
-            servings=recipes_form.vars["servings"],
-            author=user["id"]
-        )
-        redirect(URL("index"))
-    return {"user": user, "ingredients_form": ingredients_form, "recipes_form": recipes_form}
 
-@action("/recipe/api/recipes",method=["GET"])
-@action.uses(db)
-def add_recipe():
-    # returns all recipes in the database
-    rows = db(db.recipes).select().as_list()
-    print("returning recipes: ", rows)
-    return {"recipes": rows}
+    # send full ingredient + recipe lists for the Vue app
+    ingredients = db(db.ingredients).select().as_list()
+    recipes     = db(db.recipes).select().as_list()
 
-@action("/recipe/api/ingredients",method=["GET"])
+    return dict(user=user,
+                ingredients_form=ing_form,
+                ingredients=ingredients,
+                recipes=recipes)
+
+# Read only
+@action("api/ingredients", method=["GET"])
 @action.uses(db)
-def add_ingredients():
-    # returns all recipes in the database
-    rows = db(db.ingredients).select().as_list()
-    print("returning ingredients: ", rows)
-    return {"ingredients": rows}
+def api_ingredients():
+    return dict(ingredients=db(db.ingredients).select().as_list())
+
+@action("api/recipes", method=["GET"])
+@action.uses(db)
+def api_recipes():
+    return dict(recipes=db(db.recipes).select().as_list())
+
+@action("api/recipe/<rid:int>", method=["GET"])
+@action.uses(db)
+def api_one_recipe(rid):
+    rec = db.recipes[rid] or abort(404)
+    links = db(db.link.recipe_id == rid).select().as_list()
+    return dict(recipe=rec, ingredients=links)
+
+
+# create or update
+@action("api/recipe", method=["POST", "PUT"])
+@action.uses(db, auth.user)
+def api_save_recipe():
+    # ----- detect payload type ---------------------------------------
+    is_json = request.headers.get("content-type", "").startswith("application/json")
+    if is_json:
+        data = request.json or abort(400, "Missing JSON")
+        ingredients_payload = data.get("ingredients", [])
+        image_file = None
+        recipe_fields = {k: data.get(k) for k in (
+            "name", "type", "description",
+            "instruction_steps", "servings")}
+    else:                                              # multipart/form-data
+        # normal fields live in request.POST
+        recipe_fields = {k: request.POST.get(k) for k in (
+            "name", "type", "description",
+            "instruction_steps", "servings")}
+        recipe_fields["servings"] = int(recipe_fields["servings"])
+        ingredients_payload = json.loads(request.POST.get("ingredients", "[]"))
+        image_file = request.files.get("image")
+
+    recipe_fields["author"] = auth.user_id
+
+    # -------- create/update recipe row -------------------------------
+    if request.method == "POST":
+        rid = db.recipes.insert(**recipe_fields, image=image_file)
+    else:
+        rid = (request.json or request.POST).get("id") or abort(400, "Missing id")
+        rec = db.recipes[rid] or abort(404)
+        if rec.author != auth.user_id:
+            abort(403, "Not your recipe")
+        rec.update_record(**recipe_fields, image=image_file or rec.image)
+        db(db.link.recipe_id == rid).delete()
+
+    # -------- link ingredients & calc calories -----------------------
+    total = 0
+    for link in ingredients_payload:            # [{id, qty}, …]
+        ing = db.ingredients[link["id"]] or abort(400, "Bad ingredient")
+        qty = int(link["qty"])
+        db.link.insert(recipe_id=rid,
+                       ingredient_id=ing.id,
+                       quantity_per_serving=qty)
+        total += qty * ing.calories_per_unit
+
+    total *= int(recipe_fields["servings"])
+    db.recipes[rid].update_record(total_calories=total)
+
+    return dict(status="ok", recipe_id=rid, total_calories=total)

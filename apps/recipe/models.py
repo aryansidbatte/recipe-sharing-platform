@@ -1,5 +1,6 @@
+from py4web import URL
 from pydal.validators import *
-from .common import Field, db, auth
+from .common import Field, db, auth, settings
 
 db.define_table(
     "ingredients",
@@ -12,13 +13,18 @@ db.define_table(
 
 db.define_table(
     "recipes",
-    Field("name", type="string", requires=IS_NOT_EMPTY()),
-    Field("type", type="string", requires=IS_NOT_EMPTY()),
-    Field("description", type="string", requires=IS_NOT_EMPTY()),
-    Field("image", type="upload"),
-    Field("instruction_steps",type="string", requires=IS_NOT_EMPTY()),
-    Field("servings", type="integer", requires=IS_INT_IN_RANGE(0,1000)),
-    Field("author", "reference auth_user", requires=IS_NOT_EMPTY(), readable=False, writable=False),
+    Field("name", "string", requires=IS_NOT_EMPTY()),
+    Field("type", "string", requires=IS_NOT_EMPTY()),
+    Field("description", "text"),
+    Field("image", "upload",
+          upload_path=settings.UPLOAD_FOLDER,
+          download_url=lambda f: URL("download", f)),
+    Field("instruction_steps", "text"),
+    Field("servings", "integer", requires=IS_INT_IN_RANGE(1, 1000)),
+    Field("total_calories", "integer", default=0, readable=True, writable=False),
+    Field("author", "reference auth_user",
+          readable=False, writable=False, default=lambda: auth.user_id),
+    migrate=True,
 )
 
 db.define_table(
