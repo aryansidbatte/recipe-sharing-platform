@@ -2,179 +2,188 @@
 
 <!-- ─────────────────────────  HEAD  ──────────────────────────── -->
 [[block page_head]]
-  <title>Recipe Manager</title>
+<title>Recipe Manager</title>
 
-  <!-- Bulma + local CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
-  <link rel="stylesheet" href="/recipe/static/css/home.css">
+<!-- Bulma + local CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+<link rel="stylesheet" href="/recipe/static/css/home.css">
 
-  <!-- Vue (prod build) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+<!-- Vue (prod build) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
 [[end]]
 
 <!-- ─────────────────────────  BODY  ──────────────────────────── -->
 <div id="app" class="p-4">
 
-  <div class="mb-4">
-    <strong>Welcome [[=user['first_name']]]</strong>
-  </div>
-
-  <div class="columns">
-
-    <!-- ───── LEFT COLUMN  –  forms ─────────────────────────── -->
-    <div class="column is-one-quarter">
-      <h3 class="title is-5">Add Ingredient</h3>
-      [[=ingredients_form]]
-      <hr>
-      <button class="button is-primary" @click="openModal">Add New Recipe</button>
+    <div class="mb-4">
+        <strong>Welcome [[=user['first_name']]]</strong>
     </div>
 
-    <!-- ───── MIDDLE COLUMN  –  recipe search / list ─────────── -->
-    <div class="column">
-      <h3 class="title is-5">Recipes</h3>
+    <div class="columns">
 
-      <div class="field">
-        <input  class="input"
+        <!-- ───── LEFT COLUMN  –  forms ─────────────────────────── -->
+        <div class="column is-one-quarter">
+            <h3 class="title is-5">Add Ingredient</h3>
+            [[=ingredients_form]]
+            <hr>
+            <button class="button is-primary" @click="openModal">Add New Recipe</button>
+        </div>
+
+        <!-- ───── MIDDLE COLUMN  –  recipe search / list ─────────── -->
+        <div class="column">
+            <h3 class="title is-5">Recipes</h3>
+
+            <div class="field">
+                <input  class="input"
                 type="text"
                 placeholder="Search by name or type…"
                 @keyup="search_recipes($event.target.value)">
-      </div>
+            </div>
 
-      <!-- recipe cards -->
-      <article v-for="recipe in filtered_recipes" :key="recipe.id" class="card mb-3">
-        <header class="card-header">
-          <p class="card-header-title">{{ recipe.name }}</p>
-          <span class="mr-3">Type: {{ recipe.type }}</span>
-          <span>Total Cal: {{ recipe.total_calories }}</span>
-        </header>
+            <!-- recipe cards -->
+            <article v-for="recipe in filtered_recipes" :key="recipe.id" class="card mb-3">
+                <header class="card-header">
+                    <p class="card-header-title">{{ recipe.name }}</p>
+                    <span class="mr-3">Type: {{ recipe.type }}</span>
+                    <span>Total Cal: {{ recipe.total_calories }}</span>
+                </header>
 
-        <div class="card-content">
-          <img v-if="recipe.image"
+                <div class="card-content">
+                    <img v-if="recipe.image"
                :src="`/recipe/download/${recipe.image}`"
                class="mb-3">
 
-          <p><strong>Description:</strong> {{ recipe.description }}</p>
-          <p><strong>Instructions:</strong> {{ recipe.instruction_steps }}</p>
-          <p><strong>Servings:</strong> {{ recipe.servings }}</p>
+                    <p><strong>Description:</strong> {{ recipe.description }}</p>
+                    <p><strong>Instructions:</strong> {{ recipe.instruction_steps }}</p>
+                    <p><strong>Servings:</strong> {{ recipe.servings }}</p>
+                </div>
+            </article>
         </div>
-      </article>
-    </div>
 
-    <!-- ───── RIGHT COLUMN – ingredient search / list ────────── -->
-    <div class="column is-one-quarter">
-      <h3 class="title is-5">Ingredients</h3>
+        <!-- ───── RIGHT COLUMN – ingredient search / list ────────── -->
+        <div class="column is-one-quarter">
+            <h3 class="title is-5">Ingredients</h3>
 
-      <div class="field">
-        <input class="input"
+            <div class="field">
+                <input class="input"
                type="text"
                placeholder="Search by name…"
                v-model="ingredient_search"
                @keyup="search">
-      </div>
+            </div>
 
-      <ul>
-        <li v-for="ing in selected_ingredients" :key="ing.id" class="mb-2">
-          <p><strong>Name:</strong> {{ ing.name }}</p>
-          <p><strong>Unit:</strong> {{ ing.unit }}</p>
-          <p><strong>Calories:</strong> {{ ing.calories_per_unit }}</p>
-          <p><strong>Description:</strong> {{ ing.description }}</p>
-          <hr>
-        </li>
-      </ul>
+            <ul>
+                <li v-for="ing in selected_ingredients" :key="ing.id" class="mb-2">
+                    <p><strong>Name:</strong> {{ ing.name }}</p>
+                    <p><strong>Unit:</strong> {{ ing.unit }}</p>
+                    <p><strong>Calories:</strong> {{ ing.calories_per_unit }}</p>
+                    <p><strong>Description:</strong> {{ ing.description }}</p>
+                    <hr>
+                </li>
+            </ul>
+        </div>
     </div>
-  </div>
 
-  <!-- ─────────────────────────  MODAL  ─────────────────────────── -->
-  <div class="modal" :class="{ 'is-active': showModal }">
-    <div class="modal-background" @click="closeModal"></div>
+    <!-- ─────────────────────────  MODAL  ─────────────────────────── -->
+    <div class="modal" :class="{ 'is-active': showModal }">
+        <div class="modal-background" @click="closeModal"></div>
 
-    <div class="modal-card" style="width: 640px;">
-      <header class="modal-card-head">
-        <p class="modal-card-title">New Recipe</p>
-        <button class="delete" aria-label="close" @click="closeModal"></button>
-      </header>
+        <div class="modal-card" style="width: 640px;">
+            <header class="modal-card-head">
+                <p class="modal-card-title">New Recipe</p>
+                <button class="delete" aria-label="close" @click="closeModal"></button>
+            </header>
 
-      <section class="modal-card-body">
-        <!-- hand-built form -->
-        <form @submit.prevent="saveRecipe">
+            <section class="modal-card-body">
+                <!-- hand-built form -->
+                <form @submit.prevent="saveRecipe">
 
-          <!-- name / type -->
-          <div class="field">
-            <label class="label">Name</label>
-            <div class="control">
-              <input class="input" v-model="newRecipe.name" required>
-            </div>
-          </div>
+                    <!-- name / type -->
+                    <div class="field">
+                        <label class="label">Name</label>
+                        <div class="control">
+                            <input class="input" v-model="newRecipe.name" required>
+                        </div>
+                    </div>
 
-          <div class="field">
-            <label class="label">Type</label>
-            <div class="control">
-              <input class="input" v-model="newRecipe.type" required>
-            </div>
-          </div>
+                    <div class="field">
+                        <label class="label">Type</label>
+                        <div class="control">
+                            <input class="input" v-model="newRecipe.type" required>
+                        </div>
+                    </div>
 
-          <!-- description -->
-          <div class="field">
-            <label class="label">Description</label>
-            <div class="control">
-              <textarea class="textarea" v-model="newRecipe.description"></textarea>
-            </div>
-          </div>
+                    <!-- description -->
+                    <div class="field">
+                        <label class="label">Description</label>
+                        <div class="control">
+                            <textarea class="textarea" v-model="newRecipe.description"></textarea>
+                        </div>
+                    </div>
 
-          <!-- steps -->
-          <div class="field">
-            <label class="label">Instruction Steps</label>
-            <div class="control">
-              <textarea class="textarea" v-model="newRecipe.instruction_steps"></textarea>
-            </div>
-          </div>
+                    <!-- steps -->
+                    <div class="field">
+                        <label class="label">Instruction Steps</label>
+                        <div class="control">
+                            <textarea class="textarea" v-model="newRecipe.instruction_steps"></textarea>
+                        </div>
+                    </div>
 
-          <!-- servings -->
-          <div class="field">
-            <label class="label">Servings</label>
-            <div class="control">
-              <input class="input" type="number" min="1"
+                    <!-- servings -->
+                    <div class="field">
+                        <label class="label">Servings</label>
+                        <div class="control">
+                            <input class="input" type="number" min="1"
                      v-model.number="newRecipe.servings" required>
-            </div>
-          </div>
+                        </div>
+                    </div>
 
-          <hr>
+                    <div class="field">
+                        <label class="label">Image (optional)</label>
+                        <div class="control">
+                            <input  class="input" type="file"
+                        @change="onFileChange"
+                        accept="image/*">
+                        </div>
+                    </div>
 
-          <!-- ingredient checklist -->
-          <h4 class="title is-6">Ingredients (per serving)</h4>
-          <div v-for="ing in ingredients" :key="ing.id" class="field is-grouped is-align-items-center mb-2">
-            <label class="checkbox mr-2">
+                    <hr>
+
+                    <!-- ingredient checklist -->
+                    <h4 class="title is-6">Ingredients (per serving)</h4>
+                    <div v-for="ing in ingredients" :key="ing.id" class="field is-grouped is-align-items-center mb-2">
+                        <label class="checkbox mr-2">
               <input type="checkbox"
                      :value="ing.id"
                      v-model="newRecipe.selected">
               {{ ing.name }} ({{ ing.unit }})
             </label>
 
-            <input v-if="newRecipe.selected.includes(ing.id)"
+                        <input v-if="newRecipe.selected.includes(ing.id)"
                    class="input is-small"
                    style="max-width: 80px;"
                    type="number" min="1"
                    v-model.number="newRecipe.qty[ing.id]">
-          </div>
+                    </div>
 
-          <!-- live calories -->
-          <p v-if="calculatedCalories !== null" class="has-text-weight-semibold mt-3">
-            Total Calories: {{ calculatedCalories }}
-          </p>
+                    <!-- live calories -->
+                    <p v-if="calculatedCalories !== null" class="has-text-weight-semibold mt-3">
+                        Total Calories: {{ calculatedCalories }}
+                    </p>
 
-        </form>
-      </section>
+                </form>
+            </section>
 
-      <footer class="modal-card-foot">
-        <button class="button is-success" @click="saveRecipe">Save</button>
-        <button class="button" @click="closeModal">Cancel</button>
-      </footer>
+            <footer class="modal-card-foot">
+                <button class="button is-success" @click="saveRecipe">Save</button>
+                <button class="button" @click="closeModal">Cancel</button>
+            </footer>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- ─────────────────────────  SCRIPTS  ────────────────────────── -->
 [[block page_scripts]]
-  <!-- Vue app script (index.js already fetches data & defines methods) -->
-  <script src="[[=URL('static','js/index.js')]]"></script>
+<!-- Vue app script (index.js already fetches data & defines methods) -->
+<script src="[[=URL('static','js/index.js')]]"></script>
 [[end]]

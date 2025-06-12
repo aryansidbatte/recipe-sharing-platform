@@ -42,6 +42,7 @@ const app = {
         servings: 1,
         selected: [],        // [ingredient id, …]
         qty: {},             // {id: quantity_per_serving}
+        imageFile: null,
       },
     };
   },
@@ -76,6 +77,9 @@ const app = {
         (r) => r.name.toLowerCase().includes(t) || r.type.toLowerCase().includes(t)
       );
     },
+    onFileChange(evt) {
+      this.newRecipe.imageFile = evt.target.files[0] || null;
+    },
 
     // modal controls
     openModal() {
@@ -99,35 +103,49 @@ const app = {
 
     // CRUD calls
     saveRecipe() {
-      if (
-        !this.newRecipe.name ||
-        !this.newRecipe.type ||
-        this.newRecipe.selected.length === 0
-      ) {
-        alert("Fill all required fields and pick at least one ingredient.");
+    if (!this.newRecipe.name || !this.newRecipe.type ||
+        this.newRecipe.selected.length === 0) {
+        alert("Fill required fields and pick at least one ingredient.");
         return;
-      }
+    }
 
-      const payload = {
-        name: this.newRecipe.name,
-        type: this.newRecipe.type,
-        description: this.newRecipe.description,
-        instruction_steps: this.newRecipe.instruction_steps,
-        servings: this.newRecipe.servings,
-        ingredients: this.newRecipe.selected.map((id) => ({
-          id,
-          qty: this.newRecipe.qty[id] || 1,
-        })),
-      };
+    /* -------- build multipart/form-data -------- */
+    const fd = new FormData();
+    fd.append("name",         this.newRecipe.name);
+    fd.append("type",         this.newRecipe.type);
+    fd.append("description",  this.newRecipe.description);
+    fd.append("instruction_steps", this.newRecipe.instruction_steps);
+    fd.append("servings",     this.newRecipe.servings);
 
-      ajax("/recipe/api/recipe", "POST", payload, (res) => {
+    // ingredients list as JSON string
+    fd.append("ingredients",
+                JSON.stringify(
+                this.newRecipe.selected.map(id => ({
+                    id,
+                    qty: this.newRecipe.qty[id] || 1,
+                }))
+                ));
+
+    if (this.newRecipe.imageFile) {
+        fd.append("image", this.newRecipe.imageFile);
+    }
+
+    /* -------- POST -------- */
+    fetch("/recipe/api/recipe", {
+        method: "POST",
+        body: fd,
+        credentials: "same-origin",
+    })
+    .then(r => r.json())
+    .then(res => {
         alert("Recipe saved! Total calories = " + res.total_calories);
         this.closeModal();
-        this.loadRecipes();     // refresh list
-      });
+        this.loadRecipes();
+    })
+    .catch(() => alert("Network error"));
     },
 
-    // load dataZZ
+    // load data
     loadRecipes() {
       ajax("/recipe/api/recipes", "GET", null, (res) => {
         this.recipes = res.recipes;

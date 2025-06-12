@@ -65,29 +65,40 @@ def api_recipes():
 @action("api/recipe", method=["POST", "PUT"])
 @action.uses(db, auth.user)
 def api_save_recipe():
-    data = request.json or abort(400, "Missing JSON payload")
+    # ----- detect payload type ---------------------------------------
+    is_json = request.headers.get("content-type", "").startswith("application/json")
+    if is_json:
+        data = request.json or abort(400, "Missing JSON")
+        ingredients_payload = data.get("ingredients", [])
+        image_file = None
+        recipe_fields = {k: data.get(k) for k in (
+            "name", "type", "description",
+            "instruction_steps", "servings")}
+    else:                                              # multipart/form-data
+        # normal fields live in request.POST
+        recipe_fields = {k: request.POST.get(k) for k in (
+            "name", "type", "description",
+            "instruction_steps", "servings")}
+        recipe_fields["servings"] = int(recipe_fields["servings"])
+        ingredients_payload = json.loads(request.POST.get("ingredients", "[]"))
+        image_file = request.files.get("image")
 
-    # common fields
-    recipe_fields = {k: data.get(k) for k in (
-        "name", "type", "description",
-        "instruction_steps", "servings"
-    )}
-    recipe_fields["author"] = auth.user_id   # enforce
+    recipe_fields["author"] = auth.user_id
 
-    # create or update
+    # -------- create/update recipe row -------------------------------
     if request.method == "POST":
-        rid = db.recipes.insert(**recipe_fields)
+        rid = db.recipes.insert(**recipe_fields, image=image_file)
     else:
-        rid = data.get("id") or abort(400, "Missing id for update")
+        rid = (request.json or request.POST).get("id") or abort(400, "Missing id")
         rec = db.recipes[rid] or abort(404)
         if rec.author != auth.user_id:
             abort(403, "Not your recipe")
-        rec.update_record(**recipe_fields)
-        db(db.link.recipe_id == rid).delete()   # wipe old links
+        rec.update_record(**recipe_fields, image=image_file or rec.image)
+        db(db.link.recipe_id == rid).delete()
 
-    # link ingredients + calorie sum 
+    # -------- link ingredients & calc calories -----------------------
     total = 0
-    for link in data.get("ingredients", []):      # [{id, qty}, …]
+    for link in ingredients_payload:            # [{id, qty}, …]
         ing = db.ingredients[link["id"]] or abort(400, "Bad ingredient")
         qty = int(link["qty"])
         db.link.insert(recipe_id=rid,
