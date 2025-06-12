@@ -48,7 +48,8 @@ def index():
         redirect(URL("index"))
     return {"user": user, "ingredients_form": ingredients_form, "recipes_form": recipes_form}
 
-# SEARCH API - can search by recipe name and/or type (not case sensitive)
+# EXTRA CREDIT - Ability to search by ingredients
+# SEARCH API for recipes - can search by recipe name and/or type (not case sensitive)
 @action("/recipe/api/recipes",method=["GET"])
 def get_recipes():
     # get all recipies
@@ -57,12 +58,29 @@ def get_recipes():
     # Get parameters from the request
     recipe_type = request.params.get('type')
     recipe_name = request.params.get('name')
+    ingredients_str = request.params.get('ingredients')
 
     if recipe_type:
         query &= (db.recipes.type.lower() == recipe_type.lower())
 
     if recipe_name:
         query &= (db.recipes.name.ilike(f"%{recipe_name}%"))
+
+    if ingredients_str:
+        # Parse ingredients seperated by commas
+        ingredient_list = [name.strip().lower() for name in ingredients_str.split(',') if name.strip()]
+
+        matching_ingredient_ids = db(
+            db.ingredients.name.lower().belongs(ingredient_list)
+        )._select(db.ingredients.id)
+
+        # Find matching recipe ids
+        recipe_ids_with_ingredients = db(
+            db.link.ingredient_id.belongs(matching_ingredient_ids)
+        )._select(db.link.recipe_id, distinct=True)
+
+        query &= db.recipes.id.belongs(recipe_ids_with_ingredients)
+
 
     rows = db(query).select().as_list()
     return {"recipes": rows}
