@@ -2,6 +2,7 @@ from pydal.validators import *
 from .common import Field, db, auth
 import requests
 import re
+import random
 
 
 db.define_table(
@@ -42,7 +43,6 @@ def populate_db():
             response = requests.get(base_api_url + letter)
             response.raise_for_status()
             data = response.json()
-            #print(data)
             if (data["meals"]):
                 all_meals.extend(data["meals"])
         except requests.exceptions.RequestException as e:
@@ -67,7 +67,7 @@ def populate_db():
                     ingredient = db.ingredients.insert(
                         name=ingredient_name,
                         unit="g",
-                        calories_per_unit=1,
+                        calories_per_unit=random.randint(1, 50),
                         description="imported",
                     )
                     
