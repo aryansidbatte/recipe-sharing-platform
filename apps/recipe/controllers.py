@@ -85,11 +85,29 @@ def get_recipes():
     rows = db(query).select().as_list()
     return {"recipes": rows}
 
+# EXTRA CREDIT
+# PUBLIC SEARCH API Ingredients - params: name, unit, description
 @action("/recipe/api/ingredients",method=["GET"])
 @action.uses(db)
-def add_bird():
-    rows = db(db.ingredients).select().as_list()
+def get_ingredients():
+    query = db.ingredients.id > 0
+
+    ingredient_name = request.params.get('name')
+    ingredient_unit = request.params.get('unit')
+    ingredient_description = request.params.get('description')
+
+    if ingredient_name:
+        query &= (db.ingredients.name.ilike(f"%{ingredient_name}%"))
+
+    if ingredient_unit:
+        query &= (db.ingredients.unit.lower() == ingredient_unit.lower())
+
+    if ingredient_description:
+        query &= (db.ingredients.description.ilike(f"%{ingredient_description}%"))
+
+    rows = db(query).select().as_list()
     return {"ingredients": rows}
+
 
 @action("/recipe/api/links",method=["GET"])
 @action.uses(db)
