@@ -23,6 +23,7 @@ from py4web import action, request, abort, redirect
 from .common import auth
 
 @action("index")
+@action("/")
 @action.uses("index.html", auth.user, T)
 def index():
     user = auth.get_user()
