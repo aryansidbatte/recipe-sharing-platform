@@ -48,6 +48,10 @@ const app = {
         qty: {},
         imageFile: null,
       },
+
+      recipe_search_text: "",
+      selected_type: "",
+      recipe_types: [],
     };
   },
 
@@ -72,11 +76,18 @@ const app = {
         i.name.toLowerCase().includes(t)
       );
     },
-    search_recipes(txt) {
-      const t = (txt || "").toLowerCase();
-      this.filtered_recipes = this.recipes.filter(
-        (r) => r.name.toLowerCase().includes(t) || r.type.toLowerCase().includes(t)
-      );
+    filter_recipes() {
+      const name_query = this.recipe_search_text.toLowerCase().trim();
+      const type_query = this.selected_type;
+
+      this.filtered_recipes = this.recipes.filter((r) => {
+        // Check for name match
+        const name_match = r.name.toLowerCase().includes(name_query);
+        // Check for type match (or if 'All Types' is selected)
+        const type_match = type_query ? r.type === type_query : true;
+        // Return true only if both conditions are met
+        return name_match && type_match;
+      });
     },
     onFileChange(evt) {
       this.newRecipe.imageFile = evt.target.files[0] || null;
@@ -175,6 +186,11 @@ const app = {
         this.filtered_recipes = res.recipes;
       });
     },
+    loadRecipeTypes() {
+      ajax("/recipe/api/recipe_types", "GET", null, (res) => {
+        this.recipe_types = res.types;
+      });
+    },
     loadIngredients() {
       ajax("/recipe/api/ingredients", "GET", null, (res) => {
         this.ingredients = res.ingredients;
@@ -187,6 +203,7 @@ const app = {
   mounted() {
     this.loadRecipes();
     this.loadIngredients();
+    this.loadRecipeTypes();
   },
 };
 

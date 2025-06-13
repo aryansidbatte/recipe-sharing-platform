@@ -209,3 +209,13 @@ def api_recipes():
     return dict(recipes=recs)
 
 
+
+
+@action("api/recipe_types", method=["GET"])
+@action.uses(db)
+def get_recipe_types():
+    rows = db(db.recipes).select(db.recipes.type, distinct=True)
+    unique_types = sorted([row.type for row in rows])
+    return {"types": unique_types}
+
+

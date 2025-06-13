@@ -35,13 +35,30 @@
         <!-- ───── MIDDLE COLUMN  –  recipe search / list ─────────── -->
         <div class="column is-half">
             <h3 class="title is-5">Recipes</h3>
-
+        
             <div class="field">
-                <input  class="input"
-                type="text"
-                placeholder="Search by name or type…"
-                @keyup="search_recipes($event.target.value)">
-            </div>
+                <p class="control is-expanded">
+                    <input class="input"
+                           type="text"
+                           placeholder="Search by name…"
+                           v-model="recipe_search_text"
+                           @keyup="filter_recipes">
+                </p>
+                <p class="control">
+                    <div class="select">
+                        <!--  TO STYLE -->>
+                        <select v-model="selected_type" @change="filter_recipes"   style="background:#4a90e2;color:#fff;border:1px solid #357ab8">
+                            <option value="">All Types</option>
+                            <option v-for="t in recipe_types" :key="t" :value="t">
+                                {{ t }}
+                            </option>
+                        </select>
+                    </div>
+                </p>
+        
+            <article v-for="recipe in filtered_recipes" :key="recipe.id" class="card mb-3">
+                </article>
+        </div>
 
             <!-- recipe cards -->
             <article v-for="recipe in filtered_recipes" :key="recipe.id" class="card">
