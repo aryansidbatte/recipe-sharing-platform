@@ -74,10 +74,12 @@ def parse_measure(measure_str):
     else:
         # If no number is found, the whole string is the unit (ex: "to serve")
         unit = measure_str
+        quantity = 0
     
     # Remove Unicode - if unit contains it change the unit to 'to serve'
     if not unit.isascii():
-        unit = 'to serve'
+        unit = 'to liking'
+        quantity = 0
     return int(quantity), unit
 
 # Connects to TheMealDB API and fills the database with recipes
@@ -143,7 +145,7 @@ def populate_db():
 if db(db.recipes).count() == 0:
     populate_db()
     db.commit()
-    print("Database population complete.")@
+    print("Database population complete.")
 
 '''
 db.link.truncate()

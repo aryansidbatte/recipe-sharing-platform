@@ -70,9 +70,13 @@
                     <p><strong>Servings:</strong> {{ recipe.servings }}</p>
                     <p><strong>Ingredients per serving:</strong></p>
                     <ul class="ml-4">
-                    <li v-for="ing in recipe.ingredients" :key="ing.id">
-                        {{ ing.name }} - {{ ing.qty }} : {{ ing.unit }}
-                    </li>
+                        <li v-for="ing in recipe.ingredients" :key="ing.id">
+                            {{
+                              ing.qty === 0
+                                ? ing.unit + ' – ' + ing.name
+                                : ing.qty * recipe.servings + ' ' + ing.unit + ' – ' + ing.name
+                            }}
+                          </li>
                     </ul>
                 </div>
             </article>
