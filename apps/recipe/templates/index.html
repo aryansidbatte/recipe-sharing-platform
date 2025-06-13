@@ -71,14 +71,15 @@
                     <p class="card-header-title has-text-centered">{{ recipe.name }}</p>
                     <span class="has-text-centered p-4">Type: {{ recipe.type }}</span>
                     <span class="has-text-centered p-4">Total Cal: {{ recipe.total_calories }}</span>
-
-                    <div class="card-content" v-if="recipe.author === user_id"></div>
-                        <button class="button is-light m-2" @click="startEdit(recipe.id)">
-                            <span class="icon is-small">
-                                <i class="fas fa-pen"></i>
-                            </span>
-                            <span>Edit</span>
-                        </button>
+                    <button  v-if="recipe.author === user_id"
+                        class="button is-light m-2"
+                        @click="startEdit(recipe.id)">
+                    
+                    <span class="icon is-small">
+                        <i class="fas fa-pen"></i>
+                    </span>
+                    <span>Edit</span>
+                    </button>
                 </header>
 
                 <div class="card-content">
