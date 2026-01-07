@@ -32,13 +32,11 @@ Built as a team project for UCSC CSE 183 (Spring 2025). This platform enables us
 
 ## 💻 My Contributions
 
-[IMPORTANT: Check your git commits and add 3-5 specific features YOU built. Examples:]
-- Implemented recipe CRUD endpoints and SQLite schema design
-- Built pytest automation suite reducing testing time by 48 hours
-- Coordinated code reviews and merge conflict resolution for team of 7
-- Designed responsive UI components using Bulma framework
-- [Add more based on your actual commits]
-
+- Implemented recipe card ingredient display system with database integration
+- Built user authorization and role-based editing permissions for collaborative recipe management
+- Added image upload support for recipe photos
+- Refactored index controllers and started recipe CRUD implementation
+- Coordinated merge requests and code reviews across team (merged PR #11)
 ## 🚀 Setup & Installation
 
 ```bash
