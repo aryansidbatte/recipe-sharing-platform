@@ -1,4 +1,4 @@
-# README# Recipe Sharing Platform
+# Recipe Sharing Platform
 
 **Full-stack collaborative recipe management web application**
 
