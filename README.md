@@ -36,6 +36,22 @@ Built as a team project for UCSC CSE 183 (Spring 2025). This platform enables us
 - Added image upload support for recipe photos
 - Refactored index controllers and started recipe CRUD implementation
 - Coordinated merge requests and code reviews across team (merged PR #11)
+
+## 📸 Screenshots
+
+### Recipe List View
+![Recipe List View](/01-main-page.png)
+*Full recipe display showing ingredients fetched from SQLite database with real-time integration*
+
+### Recipe Creation & Edit Interface
+![Recipe Edit Form](/02-recipe-creation.png)
+*CRUD interface with image upload functionality and ingredient management*
+
+### Recipe Added
+![Recipes List](/03-recipe-added.png)
+*Responsive scrollable list layout displaying recipes with Bulma CSS framework*
+
+
 ## 🚀 Setup & Installation
 
 ```bash
