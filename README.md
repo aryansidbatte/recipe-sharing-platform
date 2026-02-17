@@ -5,7 +5,6 @@
 Built as a team project for UCSC CSE 183 (Spring 2025). This platform enables users to create, share, and manage recipes with ingredient tracking and collaborative editing features.
 
 ## 🔗 Links
-- **Live Demo**: [Add if deployed, otherwise remove this line]
 - **Forked from**: [ucsc2025-cse183/project-12](https://github.com/ucsc2025-cse183/project-12)
 
 ## 🛠️ Tech Stack
