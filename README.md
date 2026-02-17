@@ -66,3 +66,9 @@ pip install py4web
 py4web run apps
 
 # Access at http://localhost:8000
+```
+**First-time setup:**
+1. Register a new account at http://localhost:8000
+2. Check the terminal for the activation link
+3. Click the activation link to verify your account
+4. Login with your credentials to start creating recipes
