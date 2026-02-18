@@ -5,7 +5,6 @@
 Built as a team project for UCSC CSE 183 (Spring 2025). This platform enables users to create, share, and manage recipes with ingredient tracking and collaborative editing features.
 
 ## Links
-
 - **Forked from**: [ucsc2025-cse183/project-12](https://github.com/ucsc2025-cse183/project-12)
 
 ## Tech Stack
@@ -50,3 +49,26 @@ Built as a team project for UCSC CSE 183 (Spring 2025). This platform enables us
 
 ### Recipe Added
 ![Recipes List](/03-recipe-added.png)
+*Responsive scrollable list layout displaying recipes with Bulma CSS framework*
+
+
+## Setup & Installation
+
+```bash
+# Clone repository
+git clone https://github.com/aryansidbatte/recipe-sharing-platform.git
+cd recipe-sharing-platform
+
+# Install dependencies
+pip install py4web
+
+# Run development server
+py4web run apps
+
+# Access at http://localhost:8000
+```
+**First-time setup:**
+1. Register a new account at http://localhost:8000
+2. Check the terminal for the activation link
+3. Click the activation link to verify your account
+4. Login with your credentials to start creating recipes
